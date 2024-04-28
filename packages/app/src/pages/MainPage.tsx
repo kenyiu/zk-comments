@@ -197,7 +197,7 @@ export const MainPage: React.FC<{}> = (props) => {
           Visit <a href="https://prove.email/blog/zkemail">our blog</a>{" "}or{" "}
           <a href="https://prove.email">website</a>{" "}to learn more about ZK Email,
           and find the technical details on how this demo is built{" "}
-          <a href="https://prove.email/blog/twitter">here</a>. 
+          <a href="https://prove.email/blog/twitter">here</a>.
           <br />
           <br />
           If you wish to generate a ZK proof of Twitter badge (NFT), you must:
@@ -230,7 +230,7 @@ export const MainPage: React.FC<{}> = (props) => {
         </NumberedStep>
         <NumberedStep step={5}>
           Click <b>"Prove"</b>. Note it is completely client side and{" "}
-          <a href="https://github.com/zkemail/proof-of-twitter/" target="_blank" rel="noreferrer">open source</a>, 
+          <a href="https://github.com/zkemail/proof-of-twitter/" target="_blank" rel="noreferrer">open source</a>,
           and no server ever sees your private information.
         </NumberedStep>
         <NumberedStep step={6}>
@@ -276,7 +276,7 @@ export const MainPage: React.FC<{}> = (props) => {
             }
             onClick={async () => {
               const emailBuffer = rawEmailToBuffer(emailFull); // Cleaned email as buffer
-              
+
               let input: ITwitterCircuitInputs;
               try {
                 setDisplayMessage("Generating proof...");
@@ -452,7 +452,7 @@ export const MainPage: React.FC<{}> = (props) => {
           {isSuccess && (
             <div>
               Transaction:{" "}
-              <a href={"https://sepolia.etherscan.io/tx/" + data?.hash}>
+              <a href={"https://sepolia.scrollscan.com/tx/" + data?.hash}>
                 {data?.hash}
               </a>
             </div>

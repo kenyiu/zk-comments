@@ -46,7 +46,7 @@ contract TwitterUtilsTest is Test {
     // }
 
     // Should pass (note that there are extra 0 bytes, which are filtered out but should be noted in audits)
-    function testUnpack1() public {
+    function testUnpack1() public view {
         uint256[] memory packedBytes = new uint256[](3);
         packedBytes[0] = 29096824819513600;
         packedBytes[1] = 0;
@@ -73,7 +73,7 @@ contract TwitterUtilsTest is Test {
         console.logString(byteList);
     }
 
-    function testUnpack2() public {
+    function testUnpack2() public view {
         uint256[] memory packedBytes = new uint256[](3);
         packedBytes[0] = 28557011619965818;
         packedBytes[1] = 1818845549;

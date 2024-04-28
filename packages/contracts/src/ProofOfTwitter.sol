@@ -15,7 +15,7 @@ contract ProofOfTwitter is ERC721Enumerable {
 
     uint16 public constant bytesInPackedBytes = 31;
     string constant domain = "x.com";
-    
+
     uint32 public constant pubKeyHashIndexInSignals = 0; // index of DKIM public key hash in signals array
     uint32 public constant usernameIndexInSignals = 1; // index of first packed twitter username in signals array
     uint32 public constant usernameLengthInSignals = 1; // length of packed twitter username in signals array
@@ -75,7 +75,7 @@ contract ProofOfTwitter is ERC721Enumerable {
 
         // Verify the DKIM public key hash stored on-chain matches the one used in circuit
         bytes32 dkimPublicKeyHashInCircuit = bytes32(signals[pubKeyHashIndexInSignals]);
-        require(dkimRegistry.isDKIMPublicKeyHashValid(domain, dkimPublicKeyHashInCircuit), "invalid dkim signature"); 
+        require(dkimRegistry.isDKIMPublicKeyHashValid(domain, dkimPublicKeyHashInCircuit), "invalid dkim signature");
 
         // Veiry RSA and proof
         require(
@@ -88,7 +88,7 @@ contract ProofOfTwitter is ERC721Enumerable {
             "Invalid Proof"
         );
 
-        // Extract the username chunks from the signals. 
+        // Extract the username chunks from the signals.
         // Note that this is not relevant now as username can fit in one signal
         // TODO: Simplify signal uint to string conversion
         uint256[] memory usernamePack = new uint256[](usernameLengthInSignals);
@@ -110,11 +110,7 @@ contract ProofOfTwitter is ERC721Enumerable {
         tokenCounter = tokenCounter + 1;
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal {
+    function _beforeTokenTransfer(address from) internal pure {
         require(
             from == address(0),
             "Cannot transfer - VerifiedEmail is soulbound"

@@ -75,3 +75,5 @@ tsbuildinfo
 tsconfig.tsbuildinfo
 
 .idea/
+
+deploy.sh
