@@ -38,9 +38,7 @@ If you want to generate the proof locally outside browser, follow the instructio
 
 ### Circuits
 
-Circom circuits are located in `packages/circuits`, the main circuit being [twitter.circom](packages/circuits/twitter.circom). TwitterVerifier circuit use [EmailVerifier](https://github.com/zkemail/zk-email-verify/blob/main/packages/circuits/email-verifier.circom) circuit from `@zk-email/circuits`.
-
-The regex circuit required to parse/extract Twitter username can be generated using [https://github.com/zkemail/zk-regex](zk-regex) package.
+Circom circuits are located in `packages/circuits`.
 
 #### » Generate Regex Circuit
 
@@ -88,11 +86,6 @@ For browser use, the script also compresses the chunked zkeys.
 
 **The compressed zkeys, vkey, wasm are copied to /build/artifacts` directory. This directory can be served using a local server or uploaded to S3 for use in the browser.
 
-To upload to S3, the below script can be used.
-```bash
-python3 upload_to_s3.py --build-dir <project-path>/proof-of-twitter/packages/circuits/build --circuit-name twitter 
-```
-
 There are helper functions in `@zk-email/helpers` package to download and decompress the zkeys in the browser.
 
 To use locally, please run `cd packages/circuits/build/artifacts && python3 server-cors.py 8080` and the artifacts will be accessible.
@@ -101,7 +94,7 @@ To use locally, please run `cd packages/circuits/build/artifacts && python3 serv
 
 ```bash
 # CWD = packages/circuits/scripts
-# ts-node generate-proof.ts --email-file ../tests/emls/twitter-test.eml --ethereum-address <your-eth-address>
+# ts-node generate-proof.ts --email-file ../tests/emls/-test.eml --ethereum-address <your-eth-address>
 ```
 
 This will generate input + witness using the given email file and Ethereum address, and prove using the generated zkey.
@@ -130,13 +123,13 @@ yarn test:company
 
 Note that the tests will not pass if you have generated your own zkeys and `Verifier.sol` as you would have used a different Entropy.
 
-To fix, update the `publicSignals` and `proof` in `test/TestTwitter.t.sol` with the values from `input.json` and `public.json` generated from the above steps. (Remember that you need to flip items in the nested array of `pi_b`).
+To fix, update the `publicSignals` and `proof` in `test/TestCompany.t.sol` with the values from `input.json` and `public.json` generated from the above steps. (Remember that you need to flip items in the nested array of `pi_b`).
 
 #### Deploy contracts
 
 ```bash
 # CWD = packages/contracts
-PRIVATE_KEY=<pk-hex> forge script script/DeployTwitter.s.sol.bak:Deploy -vvvv --rpc-url  https://sepolia-rpc.scroll.io/ --broadcast --legacy --extra-output-files=abi --verifier-url https://api-sepolia.scrollscan.com/api --etherscan-api-key <API-KEY> --verify
+PRIVATE_KEY=<pk-hex> forge script script/DeployCompany.s.sol.bak:Deploy -vvvv --rpc-url  https://sepolia-rpc.scroll.io/ --broadcast --legacy --extra-output-files=abi --verifier-url https://api-sepolia.scrollscan.com/api --etherscan-api-key <API-KEY> --verify
 ```
 
 They are deployed to scroll sepolia testnet at the following addresses:
@@ -151,7 +144,7 @@ src/ProofOfCompany.sol 0xF9D45eBbD284F0732b2f3826a67f58154738a3FE (failed to ver
 
 If you want to update the UI based on your own zkeys and contracts, please make the below changes:
 
-- Set the `VITE_CONTRACT_ADDRESS` in `packages/app/.env`. This is the address of the `ProofOfTwitter` contract.
+- Set the `VITE_CONTRACT_ADDRESS` in `packages/app/.env`. This is the address of the `ProofOfCompany` contract.
 - Set `VITE_CIRCUIT_ARTIFACTS_URL` in `packages/app/.env` to the URL of the directory containing circuit artifacts (compressed partial zkeys, wasm, verifier, etc). You can run a local server in `circuits/build/artifacts` directory and use that URL or upload to S3 (or similar) and use that public URL/
 
 
