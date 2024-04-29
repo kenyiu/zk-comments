@@ -16,7 +16,7 @@ import path from "path";
 import pako from "pako";
 
 // ENV Variables
-let { ZKEY_ENTROPY, ZKEY_BEACON, SILENT } = process.env;
+let { ZKEY_ENTROPY, ZKEY_BEACON, SILENT, CIRCUIT_NAME } = process.env;
 if (ZKEY_ENTROPY == null) {
   log("No entropy provided, using `dev`");
   ZKEY_ENTROPY = "dev";
@@ -27,8 +27,11 @@ if (ZKEY_BEACON == null) {
   log("No ZKEY_BEACON provided, using default");
 }
 
+if (CIRCUIT_NAME == null) {
+  CIRCUIT_NAME = "company";
+  log("No CIRCUIT_NAME provided, using default");
+}
 // Constants
-const CIRCUIT_NAME = "twitter";
 const BUILD_DIR = path.join(__dirname, "../build");
 const PHASE1_URL =
   "https://storage.googleapis.com/zkevm/ptau/powersOfTau28_hez_final_22.ptau";
@@ -144,7 +147,7 @@ async function exec() {
     path.join(BUILD_DIR, `${CIRCUIT_NAME}_js/${CIRCUIT_NAME}.wasm`),
     path.join(ARTIFACTS_DIR, `${CIRCUIT_NAME}.wasm`)
   );
-  
+
   const zKeyPath = path.join(BUILD_DIR, `${CIRCUIT_NAME}.zkey`);
 
   await generateKeys(

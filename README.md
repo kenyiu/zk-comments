@@ -132,7 +132,7 @@ To fix, update the `publicSignals` and `proof` in `test/TestTwitter.t.sol` with 
 
 ```bash
 # CWD = packages/contracts
-PRIVATE_KEY=<pk-hex> forge script script/DeployTwitter.s.sol:Deploy -vvvv --rpc-url https://rpc2.sepolia.org --broadcast
+PRIVATE_KEY=<pk-hex> forge script script/DeployTwitter.s.sol.bak:Deploy -vvvv --rpc-url https://rpc2.sepolia.org --broadcast
 ```
 
 Currently deployed contracts on Sepolia:

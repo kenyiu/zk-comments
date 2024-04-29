@@ -25,6 +25,7 @@ include "./twitter-reset-regex.circom";
 /// @input address ETH address as identity commitment (to make it as part of the proof).
 /// @output pubkeyHash Poseidon hash of the pubkey - Poseidon(n/2)(n/2 chunks of pubkey with k*2 bits per chunk).
 template TwitterVerifier(maxHeadersLength, maxBodyLength, n, k, exposeFrom) {
+    log("testing twitter verifier haha");
     assert(exposeFrom < 2);
 
     signal input emailHeader[maxHeadersLength];
@@ -78,7 +79,7 @@ template TwitterVerifier(maxHeadersLength, maxBodyLength, n, k, exposeFrom) {
     // Pack the username to int
     var maxTwitterUsernameLength = 21;
     signal twitterUsernamePacks[1] <== PackRegexReveal(maxBodyLength, maxTwitterUsernameLength)(twitterReveal, twitterUsernameIndex);
-   
+
     // Username will fit in one field element, so we take the first item from the packed array.
     twitterUsername <== twitterUsernamePacks[0];
 }

@@ -5,7 +5,7 @@
     "@proof-of-twitter/circuits": "*",
     "@proof-of-twitter/contracts": "*",
     "@rainbow-me/rainbowkit": "^1.3.3",
-    "@zk-email/helpers": "4.0.0",
+    "@zk-email/helpers": "^6.0.2",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

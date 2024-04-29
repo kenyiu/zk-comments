@@ -4,8 +4,10 @@ import "forge-std/Test.sol";
 import "forge-std/Script.sol";
 import "forge-std/console.sol";
 import "@zk-email/contracts/DKIMRegistry.sol";
-import "../src/ProofOfTwitter.sol";
+import "../src/ProofOfCompany.sol";
 import "../src/Verifier.sol";
+import { IEAS } from "@ethereum-attestation-service/eas-contracts/contracts/IEAS.sol";
+import "forge-std/console.sol";
 
 contract Deploy is Script, Test {
     function getPrivateKey() internal view returns (uint256) {
@@ -39,8 +41,17 @@ contract Deploy is Script, Test {
             bytes32(uint256(14900978865743571023141723682019198695580050511337677317524514528673897510335))
         );
 
-        ProofOfTwitter testVerifier = new ProofOfTwitter(proofVerifier, dkimRegistry);
-        console.log("Deployed ProofOfTwitter at address: %s", address(testVerifier));
+        // TODO: update the github public key hash
+        // github.com hash for selector pf2023
+        dkimRegistry.setDKIMPublicKeyHash(
+            "github.com",
+            bytes32(uint256(18769159890606851885526203517158331386071551795170342791119488780143683832216))
+        );
+
+        // Prepare the EAS contract
+        IEAS eas = IEAS(address(0xaEF4103A04090071165F78D45D83A0C0782c2B2a));
+        ProofOfCompany testVerifier = new ProofOfCompany(proofVerifier, dkimRegistry, eas);
+        console.log("Deployed ProofOfCompany at address: %s", address(testVerifier));
 
         vm.stopBroadcast();
     }

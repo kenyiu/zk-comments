@@ -24,7 +24,7 @@ describe("Twitter email test", function () {
     circuit = await wasm_tester(path.join(__dirname, "../src/twitter.circom"), {
       // NOTE: We are running tests against pre-compiled circuit in the below path
       // You need to manually compile when changes are made to circuit if `recompile` is set to `false`.
-      recompile: true,
+      recompile: false,
       output: path.join(__dirname, "../build/twitter"),
       include: [path.join(__dirname, "../node_modules"), path.join(__dirname, "../../../node_modules")],
     });
@@ -34,7 +34,7 @@ describe("Twitter email test", function () {
     const twitterVerifierInputs = await generateTwitterVerifierCircuitInputs(rawEmail, ethAddress);
     const witness = await circuit.calculateWitness(twitterVerifierInputs);
     await circuit.checkConstraints(witness);
-
+    console.log(witness);
     // Calculate DKIM pubkey hash to verify its same as the one from circuit output
     // We input pubkey as 121 * 17 chunk, but the circuit convert it to 242 * 9 chunk for hashing
     // https://zkrepl.dev/?gist=43ce7dce2466c63812f6efec5b13aa73 - This can be used to get pubkey hash from 121 * 17 chunk

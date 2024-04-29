@@ -4,19 +4,21 @@ import { useMount, useUpdateEffect } from "react-use";
 import styled from "styled-components";
 import _ from "lodash";
 import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
-import {
-  rawEmailToBuffer,
-} from "@zk-email/helpers/dist/input-helpers";
+// import {
+//   rawEmailToBuffer,
+// } from "@zk-email/helpers/dist/input-helpers";
 import { verifyDKIMSignature, DKIMVerificationResult } from "@zk-email/helpers/dist/dkim";
 import {
   downloadProofFiles,
   generateProof,
   verifyProof,
-} from "@zk-email/helpers/dist/zkp";
+} from "./zkp";
 import { abi } from "../abi.json";
 import {
   generateTwitterVerifierCircuitInputs,
   ITwitterCircuitInputs,
+  ICompanyEmailCircuitInputs,
+  generateCompanyEmailCircuitInputs
 } from "@proof-of-twitter/circuits/helpers";
 import { LabeledTextArea } from "../components/LabeledTextArea";
 import DragAndDropTextBox from "../components/DragAndDropTextBox";
@@ -27,7 +29,7 @@ import { NumberedStep } from "../components/NumberedStep";
 import { TopBanner } from "../components/TopBanner";
 import { ProgressBar } from "../components/ProgressBar";
 
-const CIRCUIT_NAME = "twitter";
+const CIRCUIT_NAME = "company";
 
 export const MainPage: React.FC<{}> = (props) => {
   const { address } = useAccount();
@@ -36,6 +38,11 @@ export const MainPage: React.FC<{}> = (props) => {
   const [emailFull, setEmailFull] = useState<string>(
     localStorage.emailFull || ""
   );
+
+  const [department, setDepartment] = useState<string>(localStorage.department ?? "");
+  const [role, setRole] = useState<string>(localStorage.role ?? "");
+  const [comments, setComments] = useState<string>(localStorage.comments ?? "");
+
   const [proof, setProof] = useState<string>(localStorage.proof || "");
   const [publicSignals, setPublicSignals] = useState<string>(
     localStorage.publicSignals || ""
@@ -96,8 +103,10 @@ export const MainPage: React.FC<{}> = (props) => {
     if (!proofStr) return [];
 
     const proof = JSON.parse(proofStr);
-
-    return [
+    // console.log('---proof---');
+    // console.log(proof);
+    // console.log('---end of proof---');
+    const reformattedProof = [
       proof.pi_a.slice(0, 2),
       proof.pi_b
         .slice(0, 2)
@@ -105,8 +114,13 @@ export const MainPage: React.FC<{}> = (props) => {
         .flat(),
       proof.pi_c.slice(0, 2),
     ].flat();
+    console.log(reformattedProof);
+    return reformattedProof;
   };
 
+  // console.log('--- public signals ---');
+  // console.log(JSON.parse(publicSignals));
+  // console.log('--- end of public signals ---');
   const { config } = usePrepareContractWrite({
     // @ts-ignore
     address: import.meta.env.VITE_CONTRACT_ADDRESS,
@@ -169,11 +183,11 @@ export const MainPage: React.FC<{}> = (props) => {
     <Container>
       {showBrowserWarning && (
         <TopBanner
-          message={"ZK Email only works on Chrome or Chromium-based browsers."}
+          message={"ZK Comments only works on Chrome or Chromium-based browsers."}
         />
       )}
       <div className="title">
-        <Header>Proof of Twitter: ZK Email Demo</Header>
+        <Header>ZK Comments Demo</Header>
       </div>
 
       <Col
@@ -185,48 +199,31 @@ export const MainPage: React.FC<{}> = (props) => {
         }}
       >
         <span style={{ color: "rgba(255, 255, 255, 0.7)" }}>
-          Welcome to a demo page for ZK-Email technology.{" "}
-          <a href="https://github.com/zk-email-verify/zk-email-verify/">
-            Our library
-          </a>{" "}
-          will allow you to generate zero knowledge proofs proving you received
-          some email and mask out any private data, without trusting our server
-          to keep your privacy. This demo is just one use case that lets you
-          prove you own a Twitter username on-chain, by verifying confirmation
-          emails (and their normally-hidden headers) from Twitter.
-          Visit <a href="https://prove.email/blog/zkemail">our blog</a>{" "}or{" "}
-          <a href="https://prove.email">website</a>{" "}to learn more about ZK Email,
-          and find the technical details on how this demo is built{" "}
-          <a href="https://prove.email/blog/twitter">here</a>.
+          Welcome to a demo page for ZK-Comments.
+          <br /><br />
+          <strong>Problem trying to solve:</strong> People want to know the comments from current employee from the "real" employees;
+          however, there is no existing web2 solution allowing employees doing so without risking being found.
+          <br /><br />
+          <strong>Solution:</strong> Zero knowledge proof generated on user's browser without sending any sensitive data to the server
+          utilizing the DKIM feature of the email.
+          Visit the presentation <a href="https://example.com/zk-comments/">here</a>.
           <br />
           <br />
-          If you wish to generate a ZK proof of Twitter badge (NFT), you must:
+          If you wish to comment, you must:
         </span>
         <NumberedStep step={1}>
-          Send yourself a{" "}
-          <a
-            href="https://twitter.com/account/begin_password_reset"
-            target="_blank"
-            rel="noreferrer"
-          >
-            password reset email
-          </a>{" "}
-          from Twitter. (Reminder: Twitter name with emoji might fail to pass DKIM verification)
+          Receive an email from Github, etc
         </NumberedStep>
         <NumberedStep step={2}>
-          In your inbox, find the email from Twitter and click the three dot
-          menu, then "Show original" then "Copy to clipboard". If on Outlook,
-          download the original email as .eml and copy it instead.
+          In your inbox, find that email and get the "Original Email".
         </NumberedStep>
         <NumberedStep step={3}>
-          Copy paste or drop that into the box below. Note that we cannot use
-          this to phish you: we do not know your password, and we never get this
-          email info because we have no server at all. We are actively searching
-          for a less sketchy email.
+          Copy paste or drop that into the box below.
         </NumberedStep>
         <NumberedStep step={4}>
-          Paste in your sending Ethereum address. This ensures that no one else
-          can "steal" your proof for another account (frontrunning protection!).
+          Type your `Role`, `Department`, `Comments` and `ETH Address` in the box below.
+          <br />
+          Please note that the `Role`, `Department` and `Comments` will be public on-chain and associated with your ETH address.
         </NumberedStep>
         <NumberedStep step={5}>
           Click <b>"Prove"</b>. Note it is completely client side and{" "}
@@ -234,10 +231,8 @@ export const MainPage: React.FC<{}> = (props) => {
           and no server ever sees your private information.
         </NumberedStep>
         <NumberedStep step={6}>
-          Click <b>"Verify"</b> and then <b>"Mint Twitter Badge On-Chain"</b>,
-          and approve to mint the NFT badge that proves Twitter ownership! Note
-          that it is 700K gas right now so only feasible on Sepolia, though we
-          intend to reduce this soon.
+          Click <b>"Verify"</b> and then <b>"Attest On-Chain"</b>,
+          and sign the transaction in your wallet to prove you are the account owner of the email address.
         </NumberedStep>
       </Col>
       <Main>
@@ -261,10 +256,31 @@ export const MainPage: React.FC<{}> = (props) => {
             }}
           />
           <SingleLineInput
-            label="Ethereum Address"
+            label="Eth Address"
             value={ethereumAddress}
             onChange={(e) => {
               setEthereumAddress(e.currentTarget.value);
+            }}
+          />
+          <SingleLineInput
+            label="Department"
+            value={department}
+            onChange={(e) => {
+              setDepartment(e.currentTarget.value);
+            }}
+          />
+          <SingleLineInput
+            label="Role"
+            value={role}
+            onChange={(e) => {
+              setRole(e.currentTarget.value);
+            }}
+          />
+          <LabeledTextArea
+            label="Comments"
+            value={comments}
+            onChange={(e) => {
+              setComments(e.currentTarget.value);
             }}
           />
           <Button
@@ -275,14 +291,39 @@ export const MainPage: React.FC<{}> = (props) => {
               ethereumAddress.length === 0
             }
             onClick={async () => {
+              // Sometimes, newline encodings re-encode \r\n as just \n, so re-insert the \r so that the email hashes correctly
+              function insert13Before10(a: Uint8Array): Uint8Array {
+                let ret = new Uint8Array(a.length + 1000);
+                let j = 0;
+                for (let i = 0; i < a.length; i++) {
+                  // Ensure each \n is preceded by a \r
+                  if (a[i] === 10 && i > 0 && a[i - 1] !== 13) {
+                    ret[j] = 13;
+                    j++;
+                  }
+                  ret[j] = a[i];
+                  j++;
+                }
+
+                return ret.slice(0, j);
+              }
+
+              // Return the Uint8Array of the email after cleaning (/n -> /r/n)
+              function rawEmailToBuffer(email: string) {
+                const byteArray = new TextEncoder().encode(email);
+                const cleaned = insert13Before10(byteArray);
+                return Buffer.from(cleaned.buffer);
+              }
               const emailBuffer = rawEmailToBuffer(emailFull); // Cleaned email as buffer
 
-              let input: ITwitterCircuitInputs;
+              // let input: ITwitterCircuitInputs;
+              let input: ICompanyEmailCircuitInputs;
               try {
                 setDisplayMessage("Generating proof...");
                 setStatus("generating-input");
 
-                input = await generateTwitterVerifierCircuitInputs(emailBuffer, ethereumAddress);
+                // input = await generateTwitterVerifierCircuitInputs(emailBuffer, ethereumAddress);
+                input = await generateCompanyEmailCircuitInputs(emailBuffer, ethereumAddress);
 
                 console.log("Generated input:", JSON.stringify(input));
               } catch (e) {
@@ -316,6 +357,7 @@ export const MainPage: React.FC<{}> = (props) => {
 
               console.timeEnd("zk-dl");
               recordTimeForActivity("finishedDownloading");
+              console.log('here i am');
 
               console.time("zk-gen");
               recordTimeForActivity("startedProving");

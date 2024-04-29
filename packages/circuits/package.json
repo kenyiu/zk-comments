@@ -3,20 +3,25 @@
   "version": "4.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "mkdir -p build && circom src/twitter.circom -l ../../node_modules -l ./node_modules --wasm --r1cs --sym -o ./build",
-    "generate-regex": "zk-regex decomposed -d ./components/twitter_reset.json -c ./components/twitter_reset_regex.circom -t TwitterResetRegex -g true",
-    "test": "NODE_OPTIONS=--max_old_space_size=16384 jest"
+    "build:twitter": "mkdir -p build && circom src/twitter.circom -l ../../node_modules -l ./node_modules --wasm --r1cs --sym -o ./build",
+    "build:company": "mkdir -p build && circom src/company.circom -l ../../node_modules -l ./node_modules --wasm --r1cs --sym -o ./build",
+    "generate-regex": "zk-regex decomposed -d ./src/twitter-reset.json -c ./src/twitter-reset-regex.circom -t TwitterResetRegex -g true",
+    "generate-regex:to-address": "zk-regex decomposed -d src/to-domain.json -c ./src/to-address-regex.circom -t ToAddressRegex -g true",
+    "test:company": "NODE_OPTIONS=--max_old_space_size=16384 jest --testMatch='**/company.test.ts' --silent=false",
+    "test:twitter": "NODE_OPTIONS=--max_old_space_size=16384 jest --testMatch='**/twitter.test.ts' --silent=false"
   },
   "dependencies": {
-    "@zk-email/circuits": "4.0.0",
-    "@zk-email/helpers": "4.0.0",
-    "@zk-email/zk-regex-circom": "^1.1.1",
+    "@zk-email/circuits": "6.0.2",
+    "@zk-email/helpers": "^6.0.2",
+    "@zk-email/zk-regex-circom": "2.0.2",
     "commander": "^11.1.0",
-    "snarkjs": "git+https://github.com/vb7401/snarkjs.git#24981febe8826b6ab76ae4d76cf7f9142919d2b8"
+    "snarkjs": "git+https://github.com/vb7401/snarkjs.git#24981febe8826b6ab76ae4d76cf7f9142919d2b8",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
+    "@types/node": "^20.12.7",
     "@types/pako": "^2.0.3",
     "babel-preset-jest": "^29.6.3",
     "chai": "^4.3.7",
@@ -26,6 +31,8 @@
     "ffjavascript": "^0.2.59",
     "jest": "^29.5.0",
     "mocha": "^10.2.0",
-    "pako": "^2.1.0"
+    "pako": "^2.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
   }
 }
