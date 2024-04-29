@@ -1,18 +1,20 @@
-# Proof of Twitter
+# ZK Comments 
 
-Prove ownership of a X (Twitter) account using an email from Twitter, and mint an NFT with your Twitter username.
+We are presenting you a DApp built based on Scroll, where Employee can self-attest themselves using the emails they received by providers like Github recently using Zero-knowledge libraries without disclosing anything but the recipient's domain.
 
-This project is a demonstration of ZK Email. You can fork it to build other projects using ZK Email.
-
-Try it here: https://twitter.prove.email/
 
 ## How it works
 
-You can use an email from Twitter that contains `email was meant for @username` to generate a ZK proof that you own the Twitter account `@username`.
-
-This ZK proof can be used to mint an NFT corresponding to your username in the `ProofOfTwitter` contract.
+1. Request a forget password request from Github
+2. Copy the Original Email received by Github
+3. Paste to our website and generate the zk proof on client-side (NO DATA is transferred to server/blockchain at this stage)
+4. After the generation of zk proof, type the comments of the company and get it sent to the chain. (Only your email domain, wallet address, public key of the DNS record and comments will be disclosed)
 
 ## Running locally
+#### Pre-requisites
+1. rust
+2. foundry
+3. zk-regexp
 
 #### Install dependencies
 
@@ -40,31 +42,32 @@ Circom circuits are located in `packages/circuits`, the main circuit being [twit
 
 The regex circuit required to parse/extract Twitter username can be generated using [https://github.com/zkemail/zk-regex](zk-regex) package.
 
-#### » Generate Twitter Regex Circuit
+#### » Generate Regex Circuit
 
 ```bash
 # CWD = packages/circuits
+yarn generate-regex:to-address
 yarn generate-regex
 ```
 
-This will generate `components/twitter_reset.circom` using the config in `components/twitter_reset.json`. This `twitter_reset.circom` is imported in `twitter.circom`.
+This will generate `src/twitter-reset-regex.circom` and `src/to-address-regex.circom` using the config in `src/twitter_reset.json` and `src/to-domain.json` 
 
-Note that `twitter_reset.circom` is already in repo, so this step is optional.
+Note that `twitter_reset-regex.circom` and `to-domain-regex.circom` is already in repo, so this step is optional.
 
 #### » Build the circuit
 
 ```bash
 # CWD = packages/circuits
-yarn build
+yarn build:company && yarn build:twitter
 ```
 
-This will create `twitter.wasm` and other files in `packages/circuits/build` directory.
+This will create `twitter.wasm`, `company.wasm` and other files in `packages/circuits/build` directory.
 
 You can test the circuit using
 
 ```bash
 # CWD = packages/circuits
-yarn test
+yarn test:company && yarn test:twitter
 ```
 
 #### » Generating Zkey
@@ -92,12 +95,13 @@ python3 upload_to_s3.py --build-dir <project-path>/proof-of-twitter/packages/cir
 
 There are helper functions in `@zk-email/helpers` package to download and decompress the zkeys in the browser.
 
+To use locally, please run `cd packages/circuits/build/artifacts && python3 server-cors.py 8080` and the artifacts will be accessible.
 
 #### » Generate Input and Proof
 
 ```bash
 # CWD = packages/circuits/scripts
-ts-node generate-proof.ts --email-file ../tests/emls/twitter-test.eml --ethereum-address <your-eth-address>
+# ts-node generate-proof.ts --email-file ../tests/emls/twitter-test.eml --ethereum-address <your-eth-address>
 ```
 
 This will generate input + witness using the given email file and Ethereum address, and prove using the generated zkey.
@@ -108,7 +112,7 @@ The script also verify the generated proof are correct. You can use the proof an
 
 ### Contracts
 
-The solidity contracts can be found in `packages/contracts`. The main contract is [ProofOfTwitter.sol](packages/contracts/src/ProofOfTwitter.sol).
+The solidity contracts can be found in `packages/contracts`. 
 
 #### You can build the contracts using
 
@@ -121,7 +125,7 @@ yarn build  # Assume you have foundry installed
 
 ```bash
 # CWD = packages/contracts
-yarn test
+yarn test:company
 ```
 
 Note that the tests will not pass if you have generated your own zkeys and `Verifier.sol` as you would have used a different Entropy.
@@ -132,15 +136,15 @@ To fix, update the `publicSignals` and `proof` in `test/TestTwitter.t.sol` with 
 
 ```bash
 # CWD = packages/contracts
-PRIVATE_KEY=<pk-hex> forge script script/DeployTwitter.s.sol.bak:Deploy -vvvv --rpc-url https://rpc2.sepolia.org --broadcast
+PRIVATE_KEY=<pk-hex> forge script script/DeployTwitter.s.sol.bak:Deploy -vvvv --rpc-url  https://sepolia-rpc.scroll.io/ --broadcast --legacy --extra-output-files=abi --verifier-url https://api-sepolia.scrollscan.com/api --etherscan-api-key <API-KEY> --verify
 ```
 
-Currently deployed contracts on Sepolia:
+They are deployed to scroll sepolia testnet at the following addresses:
 
 ```
-  Deployed Verifier at address: 0x6096601EB33d636b0e21593469920d06647FA955
-  Deployed DKIMRegistry at address: 0x993873c1b46c756b60089cBbE3baEEC9Fa292e9f
-  Deployed ProofOfTwitter at address: 0x86D390fDed54447fD244eD0718dbFCFCcbbA7edc
+src/Verifier.sol 0x19aB947b5bddBf66419415c7b72dc7299BFA7b3A (verified)
+src/DKIMRegistry.sol 0x9e58681a270D28a0E26E01d4c1e5942CEA8A984B (verified)
+src/ProofOfCompany.sol 0xF9D45eBbD284F0732b2f3826a67f58154738a3FE (failed to verify)
 ```
 
 ### UI
@@ -151,6 +155,6 @@ If you want to update the UI based on your own zkeys and contracts, please make 
 - Set `VITE_CIRCUIT_ARTIFACTS_URL` in `packages/app/.env` to the URL of the directory containing circuit artifacts (compressed partial zkeys, wasm, verifier, etc). You can run a local server in `circuits/build/artifacts` directory and use that URL or upload to S3 (or similar) and use that public URL/
 
 
-## History
-
-This repo was originally part of the [zk-email-verify](https://github.com/zkemail/zk-email-verify). Please refer there for the commit history and original contributors.
+## Credit
+https://github.com/zkemail
+https://github.com/ethereum-attestation-service
