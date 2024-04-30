@@ -13,7 +13,11 @@ import "forge-std/console.sol";
 import { Verifier } from "./Verifier.sol";
 
 struct AttestationData {
+    string md;
     string c;
+    string d;
+    string r;
+    string s;
 }
 
 contract ProofOfCompany is ERC721Enumerable {
@@ -91,12 +95,9 @@ contract ProofOfCompany is ERC721Enumerable {
         bytes32 dkimPublicKeyHashInCircuit = bytes32(signals[pubKeyHashIndexInSignals]);
 //        console.log('---');
 //        console.logBytes32(dkimPublicKeyHashInCircuit);
-//        require(dkimRegistry.isDKIMPublicKeyHashValid(domain, dkimPublicKeyHashInCircuit), "invalid dkim signature");
+        require(dkimRegistry.isDKIMPublicKeyHashValid(domain, dkimPublicKeyHashInCircuit), "invalid dkim signature");
 
-
-
-
-        // Extract the username chunks from the signals.
+        // Extract the toDomain chunks from the signals.
         // Note that this is not relevant now as username can fit in one signal
         // TODO: Simplify signal uint to string conversion
         uint256[] memory toDomainPack = new uint256[](toDomainLengthInSignals);
@@ -104,16 +105,31 @@ contract ProofOfCompany is ERC721Enumerable {
             toDomainPack[i - toDomainIndexInSignals] = signals[i];
         }
 
+        console.log('the to domain');
+        string memory messageBytes = StringUtils.convertPackedBytesToString(
+            toDomainPack,
+            bytesInPackedBytes * toDomainLengthInSignals,
+            bytesInPackedBytes
+        );
+
+        console.log(messageBytes);
+
         // Attest the comments
         _eas.attest(
             AttestationRequest({
-                schema: 0x67052fc2074326fd8ec5e5d993d55de6dc6894be337aaefaeb35814161381332,
+                schema: 0xe48211c35083a8f46baf57b0af8199409fc80439736bec6e01ed8b814aa42c5a,
                 data: AttestationRequestData({
                     recipient: address(0), // No recipient
                     expirationTime: NO_EXPIRATION_TIME, // No expiration time
                     revocable: true,
                     refUID: EMPTY_UID, // No references UI
-                    data: abi.encode(AttestationData({c: "attestation data"})),
+                    data: abi.encode(AttestationData({
+                        md: messageBytes,
+                        c: "some comments",
+                        d: "software department",
+                        r: "software engineer",
+                        s: "5792.3"
+                    })),
                     value: 0 // No value/ETH
                 })
             })
